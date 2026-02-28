@@ -1,5 +1,6 @@
 import io
 import os
+import shlex
 import shutil
 import sys
 import time
@@ -335,7 +336,11 @@ class VaultShell:
             return
 
         src  = self._abs(args[0])
-        dest = os.path.expanduser(args[1]) if len(args) > 1 else self.local_dir
+        if len(args) > 1:
+            expanded = os.path.expanduser(args[1])
+            dest = abspath(join(self.local_dir, expanded))
+        else:
+            dest = self.local_dir
 
         try:
             info = self.vault.resolve(src)
@@ -350,8 +355,6 @@ class VaultShell:
         if info.is_dir and not recursive:
             self._warn(f"{src} is a directory — use -r to download recursively")
             return
-
-        dest = abspath(dest)
 
         with tqdm(
             unit='file',
@@ -397,6 +400,17 @@ class VaultShell:
             return
         for p in args:
             path = self._abs(p)
+            try:
+                info = self.vault.resolve(path)
+                if not info.exists:
+                    self._err(f"Not found: {path}")
+                    continue
+                if info.is_dir and not info.is_symlink:
+                    self._err(f"'{path}' is a directory — use rmdir")
+                    continue
+            except Exception as e:
+                self._err(str(e))
+                continue
             if not force:
                 try:
                     ans = input(col(f"  Delete '{path}'? [y/N] ", YELLOW)).strip().lower()
@@ -407,13 +421,6 @@ class VaultShell:
                     self._info("Skipped.")
                     continue
             try:
-                info = self.vault.resolve(path)
-                if not info.exists:
-                    self._err(f"Not found: {path}")
-                    continue
-                if info.is_dir and not info.is_symlink:
-                    self._err(f"'{path}' is a directory — use rmdir")
-                    continue
                 self.vault.rm(path)
                 self._ok(f"Deleted: {path}")
             except Exception as e:
@@ -482,8 +489,12 @@ class VaultShell:
             print()
             return
 
-        dirs  = sorted(e for e in raw_entries if os.path.isdir(join(path, e)))
-        files = sorted(e for e in raw_entries if os.path.isfile(join(path, e)))
+        dirs    = sorted(e for e in raw_entries if os.path.isdir(join(path, e)))
+        files   = sorted(e for e in raw_entries if os.path.isfile(join(path, e)))
+        broken  = sorted(
+            e for e in raw_entries
+            if not os.path.isdir(join(path, e)) and not os.path.isfile(join(path, e))
+        )
 
         if dirs:
             dir_items = [(col(n + '/', BOLD, BLUE), len(n) + 1) for n in dirs]
@@ -503,14 +514,23 @@ class VaultShell:
                 padding = ' ' * max(0, max_name - len(name))
                 print(f"  {name}{padding}{sz_str}")
 
+        if broken:
+            if dirs or files:
+                print()
+            for name in broken:
+                print(f"  {col(name, RED)}  {col('(broken link)', DIM)}")
+
         print()
         n_d = len(dirs)
         n_f = len(files)
+        n_b = len(broken)
         parts = []
         if n_d:
             parts.append(f"{n_d} dir{'s' if n_d != 1 else ''}")
         if n_f:
             parts.append(f"{n_f} file{'s' if n_f != 1 else ''}")
+        if n_b:
+            parts.append(col(f"{n_b} broken link{'s' if n_b != 1 else ''}", RED))
         summary = '  ' + ',  '.join(parts) if parts else '  0 items'
         print(col(summary, DIM))
         print()
@@ -644,7 +664,11 @@ class VaultShell:
             if not line:
                 continue
 
-            parts = line.split()
+            try:
+                parts = shlex.split(line)
+            except ValueError:
+                self._err("Parse error: unmatched quotes")
+                continue
             cmd   = parts[0].lower()
             args  = parts[1:]
 
