@@ -56,81 +56,39 @@ def _print_columns(items, indent: int = 2, min_col_w: int = 16, gap: int = 2):
 
 class VaultShell:
 
-    HELP_TEXT = """\
-\033[96m\033[1m  Navigation\033[0m
-\033[2m  ────────────────────────────────────────────────────────\033[0m
-\033[1m    ls [path]              \033[0m\033[2mList vault contents\033[0m
-\033[1m    ll [path]              \033[0m\033[2mDetailed listing with sizes and dates\033[0m
-\033[1m    cd <path>              \033[0m\033[2mEnter vault directory\033[0m
-\033[1m    pwd                    \033[0m\033[2mShow current vault path\033[0m
-\033[1m    tree [path]            \033[0m\033[2mDirectory tree view\033[0m
-\033[1m    find <name>            \033[0m\033[2mSearch files and dirs by name\033[0m
-
-\033[96m\033[1m  File transfer\033[0m
-\033[2m  ────────────────────────────────────────────────────────\033[0m
-\033[1m    put <file>             \033[0m\033[2mEncrypt & upload from local dir\033[0m
-\033[1m    put <file> [dest] -r   \033[0m\033[2mUpload directory recursively\033[0m
-\033[1m    put <file> [dest] -f   \033[0m\033[2mOverwrite if exists\033[0m
-\033[1m    get <vault_path>       \033[0m\033[2mDecrypt & download to local dir\033[0m
-\033[1m    get <vault_path> -r    \033[0m\033[2mDownload directory recursively\033[0m
-
-\033[96m\033[1m  Local system\033[0m
-\033[2m  ────────────────────────────────────────────────────────\033[0m
-\033[1m    lcd [path]             \033[0m\033[2mChange local working directory\033[0m
-\033[1m    lls [path]             \033[0m\033[2mList local directory\033[0m
-
-\033[96m\033[1m  File management\033[0m
-\033[2m  ────────────────────────────────────────────────────────\033[0m
-\033[1m    mkdir <path>           \033[0m\033[2mCreate directory in vault\033[0m
-\033[1m    del <path>             \033[0m\033[2mDelete file from vault\033[0m
-\033[1m    rmdir <path> [-r]      \033[0m\033[2mDelete directory (add -r for recursive)\033[0m
-\033[1m    cat <path>             \033[0m\033[2mPrint file contents to screen\033[0m
-\033[1m    info [path]            \033[0m\033[2mShow vault or file info\033[0m
-
-\033[96m\033[1m  Other\033[0m
-\033[2m  ────────────────────────────────────────────────────────\033[0m
-\033[1m    clr / clear            \033[0m\033[2mClear screen\033[0m
-\033[1m    help / ?               \033[0m\033[2mThis help\033[0m
-\033[1m    0 / exit               \033[0m\033[2mLock vault and exit\033[0m
-"""
-
-    HELP_TEXT_PLAIN = """\
-  Navigation
-  ────────────────────────────────────────────────────────
-    ls [path]              List vault contents
-    ll [path]              Detailed listing with sizes and dates
-    cd <path>              Enter vault directory
-    pwd                    Show current vault path
-    tree [path]            Directory tree view
-    find <name>            Search files and dirs by name
-
-  File transfer
-  ────────────────────────────────────────────────────────
-    put <file>             Encrypt & upload from local dir
-    put <file> [dest] -r   Upload directory recursively
-    put <file> [dest] -f   Overwrite if exists
-    get <vault_path>       Decrypt & download to local dir
-    get <vault_path> -r    Download directory recursively
-
-  Local system
-  ────────────────────────────────────────────────────────
-    lcd [path]             Change local working directory
-    lls [path]             List local directory
-
-  File management
-  ────────────────────────────────────────────────────────
-    mkdir <path>           Create directory in vault
-    del <path>             Delete file from vault
-    rmdir <path> [-r]      Delete directory
-    cat <path>             Print file contents to screen
-    info [path]            Show vault or file info
-
-  Other
-  ────────────────────────────────────────────────────────
-    clr / clear            Clear screen
-    help / ?               This help
-    0 / exit               Lock vault and exit
-"""
+    _HELP_SECTIONS = [
+        ("Navigation", [
+            ("ls [path]",            "List vault contents"),
+            ("ll [path]",            "Detailed listing with sizes and dates"),
+            ("cd <path>",            "Enter vault directory"),
+            ("pwd",                  "Show current vault path"),
+            ("tree [path]",          "Directory tree view"),
+            ("find <name>",          "Search files and dirs by name"),
+        ]),
+        ("File transfer", [
+            ("put <file>",           "Encrypt & upload from local dir"),
+            ("put <file> [dest] -r", "Upload directory recursively"),
+            ("put <file> [dest] -f", "Overwrite if exists"),
+            ("get <vault_path>",     "Decrypt & download to local dir"),
+            ("get <vault_path> -r",  "Download directory recursively"),
+        ]),
+        ("Local system", [
+            ("lcd [path]",           "Change local working directory"),
+            ("lls [path]",           "List local directory"),
+        ]),
+        ("File management", [
+            ("mkdir <path>",         "Create directory in vault"),
+            ("del <path>",           "Delete file from vault"),
+            ("rmdir <path> [-r]",    "Delete directory (add -r for recursive)"),
+            ("cat <path>",           "Print file contents to screen"),
+            ("info [path]",          "Show vault or file info"),
+        ]),
+        ("Other", [
+            ("clr / clear",          "Clear screen"),
+            ("help / ?",             "This help"),
+            ("0 / exit",             "Lock vault and exit"),
+        ]),
+    ]
 
     def __init__(self, vault: Vault, vault_path: str):
         self.vault      = vault
@@ -164,10 +122,7 @@ class VaultShell:
     def _resolve_local(self, path: str) -> str:
         if os.path.isabs(path) or path.startswith('~'):
             return os.path.expanduser(path)
-        candidate = join(self.local_dir, path)
-        if os.path.exists(candidate):
-            return candidate
-        return path
+        return join(self.local_dir, path)
 
     def _cmd_ls(self, args: list, long: bool = False):
         path = self._abs(args[0]) if args else self.cwd
@@ -191,7 +146,7 @@ class VaultShell:
 
         if long:
             print()
-            sep = col('  ' + '─' * 58, DIM)
+            sep = col('  ' + '─' * max(20, _term_width() - 4), DIM)
             hdr = (
                 col('  ', DIM) +
                 col('TYPE', DIM) + '  ' +
@@ -220,7 +175,7 @@ class VaultShell:
                 parts.append(f"{n_d} dir{'s' if n_d != 1 else ''}")
             if n_f:
                 parts.append(f"{n_f} file{'s' if n_f != 1 else ''}")
-            summary = '  ' + ',  '.join(parts) if parts else '  0 items'
+            summary = '  ' + ', '.join(parts) if parts else '  0 items'
             if total_sz:
                 summary += col(f"  —  {_fmt_size(total_sz)}", DIM)
             print(col(summary, DIM))
@@ -245,7 +200,7 @@ class VaultShell:
                 parts.append(f"{n_d} dir{'s' if n_d != 1 else ''}")
             if n_f:
                 parts.append(f"{n_f} file{'s' if n_f != 1 else ''}")
-            summary = '  ' + ',  '.join(parts) if parts else '  0 items'
+            summary = '  ' + ', '.join(parts) if parts else '  0 items'
             if total_sz:
                 summary += f"  ·  {_fmt_size(total_sz)}"
             print(col(summary, DIM))
@@ -531,7 +486,7 @@ class VaultShell:
             parts.append(f"{n_f} file{'s' if n_f != 1 else ''}")
         if n_b:
             parts.append(col(f"{n_b} broken link{'s' if n_b != 1 else ''}", RED))
-        summary = '  ' + ',  '.join(parts) if parts else '  0 items'
+        summary = '  ' + ', '.join(parts) if parts else '  0 items'
         print(col(summary, DIM))
         print()
 
@@ -625,18 +580,18 @@ class VaultShell:
 
     def _print_compact_header(self):
         self._clear_screen()
+        w   = max(20, _term_width() - 4)
+        dot = col('  ·  ', DIM)
         print()
-        sep = col('  ·  ', DIM)
-        bar = (
-            col('  vault', DIM) +
-            col(':' + self.vault_name, BOLD, CYAN) +
-            '  ' + col(self.cwd, BOLD, BLUE) +
-            sep + col('help', DIM) +
-            sep + col('clr', DIM) +
-            sep + col('exit', DIM)
+        print(col('  ' + '─' * w, DIM))
+        print(
+            col('  ', '') +
+            col(self.vault_name, BOLD, CYAN) +
+            col('  ' + self.cwd, BOLD, BLUE) +
+            dot +
+            col('help', DIM) + dot + col('clr', DIM) + dot + col('exit', DIM)
         )
-        print(bar)
-        print(col('  ' + '─' * 56, DIM))
+        print(col('  ' + '─' * w, DIM))
         print()
 
     def run(self):
@@ -647,10 +602,10 @@ class VaultShell:
         while True:
             try:
                 prompt = (
-                    pcol('vault', BOLD, CYAN) +
-                    pcol(':' + self.vault_name, BOLD, WHITE) +
-                    pcol(' ' + self.cwd, BOLD, BLUE) +
-                    pcol(' > ', DIM)
+                    pcol('  ', '') +
+                    pcol(self.vault_name, BOLD, CYAN) +
+                    pcol('  ' + self.cwd, BOLD, BLUE) +
+                    pcol('  ›  ', DIM)
                 )
                 line = input(prompt).strip()
             except KeyboardInterrupt:
@@ -713,25 +668,37 @@ class VaultShell:
                 self._err(f"Unknown command: '{cmd}'  (type 'help')")
 
     def _print_help(self):
-        if sys.stdout.isatty():
+        tty  = sys.stdout.isatty()
+        _w   = max(20, _term_width() - 4)
+        rule = col('  ' + '─' * _w, DIM) if tty else '  ' + '─' * _w
+        print()
+        for section_name, cmds in self._HELP_SECTIONS:
+            if tty:
+                print(col(f'  {section_name}', BOLD, CYAN))
+                print(rule)
+                for cmd, desc in cmds:
+                    print(col(f'    {cmd:<28}', BOLD, WHITE) + col(desc, DIM))
+            else:
+                print(f'  {section_name}')
+                print(rule)
+                for cmd, desc in cmds:
+                    print(f'    {cmd:<28}{desc}')
             print()
-            print(self.HELP_TEXT)
-        else:
-            print()
-            print(self.HELP_TEXT_PLAIN)
+        print()
 
     def _print_welcome(self):
+        w   = max(20, _term_width() - 4)
+        dot = col('  ·  ', DIM)
+        print(col('  ' + '─' * w, DIM))
         print(
-            col('  vault', DIM) +
-            col(':' + self.vault_name, BOLD, CYAN) +
+            col('  ', '') +
+            col(self.vault_name, BOLD, CYAN) +
             col(f'  {self.vault_path}', DIM)
         )
-        print()
-        sep = col('  ·  ', DIM)
+        print(col('  ' + '─' * w, DIM))
         print(
-            col('  ', DIM) +
-            col('help', DIM) + sep +
-            col('clr', DIM) + sep +
+            col('  ', '') +
+            col('help', DIM) + dot +
+            col('clr', DIM) + dot +
             col('exit', DIM)
         )
-        print(col('  ' + '─' * 56, DIM))
