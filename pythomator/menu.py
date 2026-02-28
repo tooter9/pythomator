@@ -212,22 +212,21 @@ class Menu:
 
             name, vault_dir = vaults[idx]
 
-            while True:
-                pw = self._ask_password(f"  Password for '{name}': ")
-                if pw is None:
-                    break
+            pw = self._ask_password(f"  Password for '{name}': ")
+            if pw is None:
+                continue
 
-                print(col("  Unlocking...", DIM), end='', flush=True)
-                try:
-                    with Vault(vault_dir, pw) as vault:
-                        self._erase_line()
-                        self._clear()
-                        VaultShell(vault, vault_dir).run()
-                    return
-                except Exception as e:
+            print(col("  Unlocking...", DIM), end='', flush=True)
+            try:
+                with Vault(vault_dir, pw) as vault:
                     self._erase_line()
-                    print(col(f"\n  {e}", RED))
-                    self._pause("  Press Enter to try again...")
+                    self._clear()
+                    VaultShell(vault, vault_dir).run()
+                return
+            except Exception as e:
+                self._erase_line()
+                print(col(f"\n  {e}", RED))
+                self._pause("  Press Enter to go back...")
 
     def _do_manage_select(self):
         while True:
