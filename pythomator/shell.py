@@ -71,6 +71,7 @@ class VaultShell:
             ("put <file> [dest] -f", "Overwrite if exists"),
             ("get <vault_path>",     "Decrypt & download to local dir"),
             ("get <vault_path> -r",  "Download directory recursively"),
+            ("open <vault_path>",    "Alias for get — decrypt & download"),
         ]),
         ("Local system", [
             ("lcd [path]",           "Change local working directory"),
@@ -125,9 +126,18 @@ class VaultShell:
         return join(self.local_dir, path)
 
     def _cmd_ls(self, args: list, long: bool = False):
+        _LONG_FLAGS = {'-l', '-la', '-al', '-a', '--long'}
+        flags = {a for a in args if a.startswith('-')}
+        args  = [a for a in args if not a.startswith('-')]
+        if flags & _LONG_FLAGS:
+            long = True
         path = self._abs(args[0]) if args else self.cwd
         try:
             entries = self.vault.listdir(path)
+        except NotADirectoryError:
+            self._err(f"Not a directory: {path}")
+            self._info("Use 'get <path>' to download  or  'cat <path>' to view contents")
+            return
         except Exception as e:
             self._err(str(e))
             return
@@ -207,6 +217,7 @@ class VaultShell:
             print()
 
     def _cmd_cd(self, args: list):
+        args = [a for a in args if not a.startswith('-')]
         if not args:
             self.cwd = '/'
             return
@@ -228,6 +239,7 @@ class VaultShell:
         print(col('  ' + self.cwd, BOLD, CYAN))
 
     def _cmd_mkdir(self, args: list):
+        args = [a for a in args if not a.startswith('-')]
         if not args:
             self._err("Usage: mkdir <path>")
             return
@@ -330,8 +342,10 @@ class VaultShell:
             f"[{_fmt_size(result['bytes'])}]  "
             f"{result['elapsed']:.1f}s"
         )
+        self._info(f"Saved to: {dest}")
 
     def _cmd_cat(self, args: list):
+        args = [a for a in args if not a.startswith('-')]
         if not args:
             self._err("Usage: cat <vault_path>")
             return
@@ -491,6 +505,7 @@ class VaultShell:
         print()
 
     def _cmd_tree(self, args: list):
+        args = [a for a in args if not a.startswith('-')]
         path = self._abs(args[0]) if args else self.cwd
         print()
         self._print_tree(path, '', True)
@@ -545,6 +560,7 @@ class VaultShell:
         print()
 
     def _cmd_info(self, args: list):
+        args = [a for a in args if not a.startswith('-')]
         path = self._abs(args[0]) if args else '/'
         print()
 
@@ -648,6 +664,8 @@ class VaultShell:
                 self._cmd_put(args)
             elif cmd == 'get':
                 self._cmd_get(args)
+            elif cmd == 'open':
+                self._cmd_get(args)
             elif cmd == 'cat':
                 self._cmd_cat(args)
             elif cmd in ('del', 'rm'):
@@ -665,7 +683,9 @@ class VaultShell:
             elif cmd in ('info', 'stat'):
                 self._cmd_info(args)
             else:
-                self._err(f"Unknown command: '{cmd}'  (type 'help')")
+                self._err(f"Unknown command: '{cmd}'  (type 'help' for all commands)")
+                if cmd in ('view', 'download', 'decrypt', 'extract'):
+                    self._info("To download a file from the vault use:  get <vault_path>")
 
     def _print_help(self):
         tty  = sys.stdout.isatty()

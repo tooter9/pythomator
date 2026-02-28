@@ -5,6 +5,7 @@ from typing import List
 from . import __version__
 
 from rich.console import Console
+from rich.markup  import escape as _escape
 from rich.table   import Table
 from rich.rule    import Rule
 from rich         import box
@@ -82,14 +83,15 @@ def print_dir_listing(entries: List[dict], long_fmt: bool = False):
         tbl.add_column("Name",                      min_width=20)
 
         for e in entries:
+            safe_name = _escape(e['name'])
             if e['type'] == 'dir':
                 ico = "[bold blue]dir[/bold blue]"
                 sz  = "[dim]—[/dim]"
-                nm  = f"[bold blue]{e['name']}/[/bold blue]"
+                nm  = f"[bold blue]{safe_name}/[/bold blue]"
             else:
                 ico = "[green]file[/green]"
                 sz  = f"[cyan]{_fmt_size(e['size'])}[/cyan]"
-                nm  = e['name']
+                nm  = safe_name
             mt = f"[dim]{_fmt_time(e['mtime'])}[/dim]"
             tbl.add_row(ico, sz, mt, nm)
 
@@ -120,14 +122,14 @@ def print_dir_listing(entries: List[dict], long_fmt: bool = False):
 
         if dirs:
             dir_plain = [e['name'] + '/' for e in dirs]
-            dir_rich  = [f"[bold blue]{e['name']}/[/bold blue]" for e in dirs]
+            dir_rich  = [f"[bold blue]{_escape(e['name'])}/[/bold blue]" for e in dirs]
             _print_group(dir_plain, dir_rich)
 
         if files:
             if dirs:
                 console.print()
             file_plain = [e['name'] for e in files]
-            file_rich  = [e['name'] for e in files]
+            file_rich  = [_escape(e['name']) for e in files]
             _print_group(file_plain, file_rich)
 
         console.print()
