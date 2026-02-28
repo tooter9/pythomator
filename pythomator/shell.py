@@ -122,10 +122,7 @@ class VaultShell:
     def _resolve_local(self, path: str) -> str:
         if os.path.isabs(path) or path.startswith('~'):
             return os.path.expanduser(path)
-        candidate = join(self.local_dir, path)
-        if os.path.exists(candidate):
-            return candidate
-        return path
+        return join(self.local_dir, path)
 
     def _cmd_ls(self, args: list, long: bool = False):
         path = self._abs(args[0]) if args else self.cwd
@@ -149,7 +146,7 @@ class VaultShell:
 
         if long:
             print()
-            sep = col('  ' + '─' * 58, DIM)
+            sep = col('  ' + '─' * max(20, _term_width() - 4), DIM)
             hdr = (
                 col('  ', DIM) +
                 col('TYPE', DIM) + '  ' +
@@ -583,7 +580,7 @@ class VaultShell:
 
     def _print_compact_header(self):
         self._clear_screen()
-        w   = 60
+        w   = max(20, _term_width() - 4)
         dot = col('  ·  ', DIM)
         print()
         print(col('  ' + '─' * w, DIM))
@@ -672,7 +669,8 @@ class VaultShell:
 
     def _print_help(self):
         tty  = sys.stdout.isatty()
-        rule = col('  ' + '─' * 58, DIM) if tty else '  ' + '─' * 58
+        _w   = max(20, _term_width() - 4)
+        rule = col('  ' + '─' * _w, DIM) if tty else '  ' + '─' * _w
         print()
         for section_name, cmds in self._HELP_SECTIONS:
             if tty:
@@ -689,7 +687,7 @@ class VaultShell:
         print()
 
     def _print_welcome(self):
-        w   = 60
+        w   = max(20, _term_width() - 4)
         dot = col('  ·  ', DIM)
         print(col('  ' + '─' * w, DIM))
         print(

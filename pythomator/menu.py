@@ -454,15 +454,16 @@ class Menu:
             ]),
         ]
 
+        _sep = col('  ' + '─' * max(20, shutil.get_terminal_size((80, 24)).columns - 4), DIM)
         for section_name, cmds in sections:
             print(col(f"  {section_name}", BOLD, CYAN))
-            print(col('  ' + '─' * 52, DIM))
+            print(_sep)
             for cmd, desc in cmds:
                 print(col(f"    {cmd:<26}", BOLD, WHITE) + col(desc, DIM))
             print()
 
         print(col("  Examples", BOLD, CYAN))
-        print(col('  ' + '─' * 52, DIM))
+        print(_sep)
         examples = [
             ("put report.pdf",              "upload from local dir"),
             ("put photos/ /Pictures -r",    "upload folder recursively"),

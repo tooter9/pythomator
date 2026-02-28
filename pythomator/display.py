@@ -27,12 +27,10 @@ def print_banner():
 
 
 def print_banner_compact():
-    console.print()
     console.print(Rule(
         f"[bold cyan]pythomator[/bold cyan] [dim]v{__version__}[/dim]",
         style="dim cyan",
     ))
-    console.print()
 
 
 def print_success(msg: str):

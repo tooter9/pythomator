@@ -3,7 +3,6 @@ import io
 import os
 import sys
 import time
-from datetime import datetime
 from os.path import abspath, basename, dirname, exists, isdir, isfile, join
 
 import click
@@ -16,7 +15,6 @@ from .display import (
     print_banner, print_banner_compact,
     print_success, print_error, print_info,
     print_warning, print_dir_listing,
-    print_section,
 )
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "max_content_width": 100}
@@ -45,10 +43,6 @@ def _fmt_size(n: float) -> str:
             return f"{n:.0f} B" if unit == "B" else f"{n:.1f} {unit}"
         n /= 1024
     return str(n)
-
-
-def _fmt_time(ts: float) -> str:
-    return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M")
 
 
 def _confirm(prompt: str) -> bool:
