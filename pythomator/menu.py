@@ -63,7 +63,7 @@ class Menu:
         ver     = f"v{__version__}  "
         label   = "  pythomator  "
         title   = label + ver.rjust(w - len(label))
-        sub_txt = "  encrypted vault manager"
+        sub_txt = "  FOSS"
         sub     = sub_txt.ljust(w)
         top  = col('  ╭' + '─' * w + '╮', CYAN)
         mid1 = col('  │', CYAN) + col(title, BOLD, WHITE) + col('│', CYAN)
