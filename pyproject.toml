@@ -44,3 +44,4 @@ Homepage = "https://github.com/tooter9/pythomator"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pythomator*"]
+exclude = ["build*", "dist*"]
