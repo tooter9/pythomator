@@ -59,20 +59,15 @@ class Menu:
         print('\033[2K\r', end='', flush=True)
 
     def _header(self):
-        w       = 38
-        ver     = f"v{__version__}  "
-        label   = "  pythomator  "
-        title   = label + ver.rjust(w - len(label))
-        sub_txt = "  FOSS"
-        sub     = sub_txt.ljust(w)
-        top  = col('  ╭' + '─' * w + '╮', CYAN)
-        mid1 = col('  │', CYAN) + col(title, BOLD, WHITE) + col('│', CYAN)
-        mid2 = col('  │', CYAN) + col(sub, DIM)           + col('│', CYAN)
-        bot  = col('  ╰' + '─' * w + '╯', CYAN)
-        print(f"\n{top}\n{mid1}\n{mid2}\n{bot}\n")
+        w = 34
+        border = col('  ╔' + '═' * w + '╗', CYAN)
+        title  = f"  pythomator  v{__version__}"
+        mid    = col('  ║', CYAN) + col(title.ljust(w), BOLD, WHITE) + col('║', CYAN)
+        bot    = col('  ╚' + '═' * w + '╝', CYAN)
+        print(f"\n{border}\n{mid}\n{bot}\n")
 
     def _opt(self, n, text, color=WHITE):
-        print(col(f'  {n}', BOLD, CYAN) + col('  ›  ', DIM) + col(text, color))
+        print(col(f'  [{n}]', BOLD, CYAN) + col(f'  {text}', color))
 
     def _ask_password(self, prompt="  Password: ", confirm=False):
         import getpass
@@ -138,8 +133,7 @@ class Menu:
     def _do_create(self):
         self._clear()
         self._header()
-        print(col('  Create vault', BOLD, WHITE))
-        print()
+        print(col('  Create vault\n', BOLD, WHITE))
 
         try:
             name = input(col("  Vault name: ", BOLD, CYAN)).strip()
@@ -152,11 +146,7 @@ class Menu:
             self._pause()
             return
 
-        original_name = name
         name = self._sanitize_name(name)
-        if name != original_name:
-            print(col(f"  Name adjusted to: {name}", YELLOW))
-
         vault_dir = join(VAULTS_DIR, name)
 
         if exists(vault_dir):
@@ -195,8 +185,7 @@ class Menu:
         while True:
             self._clear()
             self._header()
-            print(col('  Open vault', BOLD, WHITE))
-            print()
+            print(col('  Open vault\n', BOLD, WHITE))
             vaults = self._get_vaults()
 
             if not vaults:
@@ -243,8 +232,7 @@ class Menu:
         while True:
             self._clear()
             self._header()
-            print(col('  Manage vault', BOLD, WHITE))
-            print()
+            print(col('  Manage vault\n', BOLD, WHITE))
             vaults = self._get_vaults()
 
             if not vaults:
@@ -276,8 +264,7 @@ class Menu:
         while True:
             self._clear()
             self._header()
-            print(col(f'  Vault: {name}', BOLD, WHITE))
-            print()
+            print(col(f'  Vault: {name}\n', BOLD, WHITE))
             self._opt('1', 'Change password')
             self._opt('2', 'Rename')
             self._opt('3', 'Delete', RED)
@@ -420,10 +407,8 @@ class Menu:
     def _do_help(self):
         self._clear()
         self._header()
-        print(col('  Commands', BOLD, WHITE))
-        print()
-        print(col(f"  Vaults stored in:  {VAULTS_DIR}", DIM))
-        print()
+        print(col('  Commands\n', BOLD, WHITE))
+        print(col(f"  Vaults stored in:  {VAULTS_DIR}\n", DIM))
 
         sections = [
             ("Navigation", [
@@ -454,16 +439,15 @@ class Menu:
             ]),
         ]
 
-        _sep = col('  ' + '─' * max(20, shutil.get_terminal_size((80, 24)).columns - 4), DIM)
         for section_name, cmds in sections:
             print(col(f"  {section_name}", BOLD, CYAN))
-            print(_sep)
+            print(col('  ' + '─' * 52, DIM))
             for cmd, desc in cmds:
                 print(col(f"    {cmd:<26}", BOLD, WHITE) + col(desc, DIM))
             print()
 
         print(col("  Examples", BOLD, CYAN))
-        print(_sep)
+        print(col('  ' + '─' * 52, DIM))
         examples = [
             ("put report.pdf",              "upload from local dir"),
             ("put photos/ /Pictures -r",    "upload folder recursively"),

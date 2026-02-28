@@ -1,13 +1,12 @@
 import shutil
+import sys
 from datetime import datetime
 from typing import List
 
 from . import __version__
 
 from rich.console import Console
-from rich.markup  import escape as _escape
 from rich.table   import Table
-from rich.rule    import Rule
 from rich         import box
 
 console     = Console()
@@ -19,19 +18,11 @@ def _term_width() -> int:
 
 
 def print_banner():
-    console.print()
-    console.print(Rule(
-        f"[bold cyan]pythomator[/bold cyan] [dim]v{__version__}[/dim]",
-        style="dim cyan",
-    ))
-    console.print()
+    console.print(f"\n  [bold cyan]pythomator[/bold cyan]  [dim]v{__version__}[/dim]\n")
 
 
 def print_banner_compact():
-    console.print(Rule(
-        f"[bold cyan]pythomator[/bold cyan] [dim]v{__version__}[/dim]",
-        style="dim cyan",
-    ))
+    console.print(f"\n  [bold cyan]pythomator[/bold cyan] [dim]v{__version__}[/dim]\n")
 
 
 def print_success(msg: str):
@@ -51,13 +42,12 @@ def print_warning(msg: str):
 
 
 def print_key_value(key: str, value: str):
-    console.print(f"  [dim]{key}[/dim]  [bold]{value}[/bold]")
+    console.print(f"  [bold]{key}:[/bold]  {value}")
 
 
 def print_section(title: str):
-    console.print()
-    console.print(f"  [bold cyan]{title}[/bold cyan]")
-    console.print(f"  [dim cyan]{'─' * (len(title) + 2)}[/dim cyan]")
+    console.print(f"\n  [bold]{title}[/bold]")
+    console.print(f"  [dim]{'─' * len(title)}[/dim]")
 
 
 def print_dir_listing(entries: List[dict], long_fmt: bool = False):
@@ -70,32 +60,29 @@ def print_dir_listing(entries: List[dict], long_fmt: bool = False):
 
     if long_fmt:
         tbl = Table(
-            box=box.ROUNDED,
+            box=box.SIMPLE,
             show_header=True,
-            header_style="bold dim",
+            header_style="dim",
             padding=(0, 1),
-            show_edge=True,
-            border_style="dim cyan",
+            show_edge=False,
         )
-        tbl.add_column("Type",     style="dim",     no_wrap=True)
-        tbl.add_column("Size",     justify="right", no_wrap=True)
-        tbl.add_column("Modified",                  no_wrap=True, min_width=16)
-        tbl.add_column("Name",                      min_width=20)
+        tbl.add_column("",         style="dim",     no_wrap=True, width=5)
+        tbl.add_column("Size",     justify="right", no_wrap=True, width=10)
+        tbl.add_column("Modified",                  no_wrap=True, width=17)
+        tbl.add_column("Name")
 
         for e in entries:
-            safe_name = _escape(e['name'])
             if e['type'] == 'dir':
-                ico = "[bold blue]dir[/bold blue]"
+                ico = "[bold blue] dir[/bold blue]"
                 sz  = "[dim]—[/dim]"
-                nm  = f"[bold blue]{safe_name}/[/bold blue]"
+                nm  = f"[bold blue]{e['name']}/[/bold blue]"
             else:
                 ico = "[green]file[/green]"
                 sz  = f"[cyan]{_fmt_size(e['size'])}[/cyan]"
-                nm  = safe_name
+                nm  = e['name']
             mt = f"[dim]{_fmt_time(e['mtime'])}[/dim]"
             tbl.add_row(ico, sz, mt, nm)
 
-        console.print()
         console.print(tbl)
 
     else:
@@ -122,14 +109,14 @@ def print_dir_listing(entries: List[dict], long_fmt: bool = False):
 
         if dirs:
             dir_plain = [e['name'] + '/' for e in dirs]
-            dir_rich  = [f"[bold blue]{_escape(e['name'])}/[/bold blue]" for e in dirs]
+            dir_rich  = [f"[bold blue]{e['name']}/[/bold blue]" for e in dirs]
             _print_group(dir_plain, dir_rich)
 
         if files:
             if dirs:
                 console.print()
             file_plain = [e['name'] for e in files]
-            file_rich  = [_escape(e['name']) for e in files]
+            file_rich  = [e['name'] for e in files]
             _print_group(file_plain, file_rich)
 
         console.print()
