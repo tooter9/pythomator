@@ -20,12 +20,20 @@ The cryptography is exactly the same as in Format 8 (1:1). What you create with 
 
 ## Installation
 
+**Recommended:**
+
+```bash
+pip install pipx
+pipx install git+https://github.com/tooter9/pythomator.git
+```
+
+**Alternative:**
+
 ```bash
 git clone https://github.com/tooter9/pythomator.git
 cd pythomator
-pip install . 
+pip install .
 ```
-
 ## Quick Start
 
 ### Interactive menu
