@@ -146,7 +146,6 @@ class VaultShell:
 
         if long:
             print()
-            sep = col('  ' + '─' * max(20, _term_width() - 4), DIM)
             hdr = (
                 col('  ', DIM) +
                 col('TYPE', DIM) + '  ' +
@@ -155,7 +154,6 @@ class VaultShell:
                 col('NAME', DIM)
             )
             print(hdr)
-            print(sep)
 
             for e in entries:
                 if e['type'] == 'dir':
@@ -169,7 +167,7 @@ class VaultShell:
                 mt = col(_fmt_time(e['mtime']), DIM)
                 print(f"  {t}  {sz}  {mt}  {nm}")
 
-            print(sep)
+            print()
             parts = []
             if n_d:
                 parts.append(f"{n_d} dir{'s' if n_d != 1 else ''}")
@@ -576,6 +574,7 @@ class VaultShell:
         print()
 
     def _clear_screen(self):
+        sys.stdout.flush()
         os.system('clear' if os.name != 'nt' else 'cls')
 
     def _print_compact_header(self):
@@ -630,10 +629,11 @@ class VaultShell:
             if cmd in ('exit', 'quit', 'q', 'bye', '0'):
                 self._clear_screen()
                 break
-            elif cmd in ('help', '?', 'h'):
-                self._print_help()
             elif cmd in ('clr', 'cls', 'clear'):
                 self._print_compact_header()
+                continue
+            elif cmd in ('help', '?', 'h'):
+                self._print_help()
             elif cmd == 'ls':
                 self._cmd_ls(args, long=False)
             elif cmd in ('ll', 'la'):
@@ -666,6 +666,8 @@ class VaultShell:
                 self._cmd_info(args)
             else:
                 self._err(f"Unknown command: '{cmd}'  (type 'help')")
+
+            print(col('  ' + '─' * max(20, _term_width() - 4), DIM))
 
     def _print_help(self):
         tty  = sys.stdout.isatty()

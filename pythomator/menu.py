@@ -53,10 +53,8 @@ class Menu:
         return vaults
 
     def _clear(self):
+        sys.stdout.flush()
         os.system('cls' if os.name == 'nt' else 'clear')
-
-    def _erase_line(self):
-        print('\033[2K\r', end='', flush=True)
 
     def _header(self):
         w       = 38
@@ -170,13 +168,11 @@ class Menu:
 
         print()
         try:
-            print(col("  Generating keys...", DIM), end='', flush=True)
+            print(col("  Generating keys...", DIM))
             os.makedirs(vault_dir)
             create_vault(vault_dir, pw)
-            self._erase_line()
             print(col(f"  Vault '{name}' created.", GREEN))
         except Exception as e:
-            self._erase_line()
             if exists(vault_dir):
                 shutil.rmtree(vault_dir, ignore_errors=True)
             print(col(f"\n  Error: {e}", RED))
@@ -227,15 +223,13 @@ class Menu:
             if pw is None:
                 continue
 
-            print(col("  Unlocking...", DIM), end='', flush=True)
+            print(col("  Unlocking...", DIM))
             try:
                 with Vault(vault_dir, pw) as vault:
-                    self._erase_line()
                     self._clear()
                     VaultShell(vault, vault_dir).run()
                 return
             except Exception as e:
-                self._erase_line()
                 print(col(f"\n  {e}", RED))
                 self._pause("  Press Enter to go back...")
 
@@ -305,10 +299,9 @@ class Menu:
         if pw is None:
             return
 
-        print(col("  Verifying...", DIM), end='', flush=True)
+        print(col("  Verifying...", DIM))
         try:
             with Vault(vault_dir, pw) as vault:
-                self._erase_line()
                 print(col("\n  Enter new password.\n", BOLD))
                 new_pw = self._ask_password("  New password: ", confirm=True)
                 if not new_pw:
@@ -316,7 +309,6 @@ class Menu:
                 vault.change_password(new_pw)
                 print(col("\n  Password changed successfully.", GREEN))
         except Exception as e:
-            self._erase_line()
             print(col(f"\n  {e}", RED))
         self._pause()
 
@@ -394,7 +386,7 @@ class Menu:
             except (KeyboardInterrupt, EOFError):
                 return
 
-        print(col("\n  Creating backup...", DIM), end='', flush=True)
+        print(col("\n  Creating backup...", DIM))
         try:
             count = 0
             with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
@@ -409,11 +401,9 @@ class Menu:
                         zf.write(full, rel)
                         count += 1
 
-            self._erase_line()
             print(col(f"  Backup saved: {dest}", GREEN))
             print(col(f"  {count} items", DIM))
         except Exception as e:
-            self._erase_line()
             print(col(f"  Error: {e}", RED))
         self._pause()
 
