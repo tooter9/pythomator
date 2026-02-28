@@ -147,7 +147,15 @@ def cmd_create(vault_dir, password):
         click.echo()
         while True:
             try:
-                password   = getpass.getpass("  New password:     ")
+                password = getpass.getpass("  New password:     ")
+            except (KeyboardInterrupt, EOFError):
+                print()
+                print_error("Interrupted.")
+                sys.exit(1)
+            if not password:
+                print_warning("Password cannot be empty — try again.")
+                continue
+            try:
                 confirm_pw = getpass.getpass("  Confirm password: ")
             except (KeyboardInterrupt, EOFError):
                 print()
@@ -156,9 +164,6 @@ def cmd_create(vault_dir, password):
             if password == confirm_pw:
                 break
             print_warning("Passwords do not match — try again.")
-        if not password:
-            print_error("Password cannot be empty.")
-            sys.exit(1)
 
     try:
         create_vault(vault_dir, password)

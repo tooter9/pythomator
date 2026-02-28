@@ -441,7 +441,7 @@ class VaultShell:
                 return
         try:
             self.vault.rmdir(path, recursive=recursive)
-            if self.cwd.startswith(path):
+            if self.cwd == path or self.cwd.startswith(path + '/'):
                 self.cwd = dirname(path) or '/'
             self._ok(f"Removed: {path}")
         except Exception as e:
@@ -555,7 +555,7 @@ class VaultShell:
         found = 0
         try:
             for root, dirs, files in self.vault.walk('/'):
-                for fname in files + dirs:
+                for fname in dirs + files:
                     if pattern in fname.lower():
                         vpath  = Vault._normalize(root + '/' + fname)
                         suffix = '/' if fname in dirs else ''
