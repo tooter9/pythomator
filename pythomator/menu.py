@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+interactive TUI menu: open, create, manage, help.
+"""
+
 import os
 import shutil
 import sys
@@ -113,18 +118,18 @@ class Menu:
         while True:
             self._clear()
             self._header()
-            self._opt('1', 'Create vault')
-            self._opt('2', 'Open vault')
-            self._opt('3', 'Manage vault')
+            self._opt('1', 'Open Vault')
+            self._opt('2', 'Create Vault')
+            self._opt('3', 'Manage Vault')
             self._opt('4', 'Help')
             self._opt('0', 'Exit', YELLOW)
             print()
             choice = self._choose()
 
             if choice == '1':
-                self._do_create()
-            elif choice == '2':
                 self._do_open()
+            elif choice == '2':
+                self._do_create()
             elif choice == '3':
                 self._do_manage_select()
             elif choice == '4':
@@ -136,7 +141,7 @@ class Menu:
     def _do_create(self):
         self._clear()
         self._header()
-        print(col('  Create vault', BOLD, WHITE))
+        print(col('  Create Vault', BOLD, WHITE))
         print()
 
         try:
@@ -191,13 +196,13 @@ class Menu:
         while True:
             self._clear()
             self._header()
-            print(col('  Open vault', BOLD, WHITE))
+            print(col('  Open Vault', BOLD, WHITE))
             print()
             vaults = self._get_vaults()
 
             if not vaults:
                 print(col("  No vaults found.", DIM))
-                print(col("  Create one first (option 1).", DIM))
+                print(col("  Create one first (option 2).", DIM))
                 self._pause("\n  Press Enter to go back...")
                 return
 
@@ -237,7 +242,7 @@ class Menu:
         while True:
             self._clear()
             self._header()
-            print(col('  Manage vault', BOLD, WHITE))
+            print(col('  Manage Vault', BOLD, WHITE))
             print()
             vaults = self._get_vaults()
 
@@ -272,10 +277,10 @@ class Menu:
             self._header()
             print(col(f'  Vault: {name}', BOLD, WHITE))
             print()
-            self._opt('1', 'Change password')
-            self._opt('2', 'Rename')
-            self._opt('3', 'Delete', RED)
-            self._opt('4', 'Export backup (.zip)')
+            self._opt('1', 'Change Password')
+            self._opt('2', 'Rename Vault')
+            self._opt('3', 'Backup Vault (.zip)')
+            self._opt('4', 'Delete Vault', RED)
             self._opt('0', 'Back', YELLOW)
             print()
             choice = self._choose()
@@ -289,10 +294,10 @@ class Menu:
                 if result:
                     name, vault_dir = result
             elif choice == '3':
+                self._do_backup(name, vault_dir)
+            elif choice == '4':
                 if self._do_delete(name, vault_dir):
                     return
-            elif choice == '4':
-                self._do_backup(name, vault_dir)
 
     def _do_change_password(self, name, vault_dir):
         pw = self._ask_password(f"  Current password for '{name}': ")

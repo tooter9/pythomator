@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+vault open/create/read/write/delete, Cryptomator v8 format.
+"""
+
 import base64
 import hashlib
 import hmac as _hmac

@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+package init, public exports.
+"""
+
 __version__ = "2.0"
 __author__  = "pythomator contributors"
 __license__ = "GPL-3.0"

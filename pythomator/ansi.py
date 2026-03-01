@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+ansi escape codes, terminal color/bold helpers.
+"""
+
 import sys
 
 RESET  = '\033[0m'

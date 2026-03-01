@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+interactive vault shell: ls, cd, put, get, find and friends.
+"""
+
 import io
 import os
 import shlex

@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+low-level crypto: AES-SIV, AES-GCM, AES-KW, scrypt KDF.
+"""
+
 import base64
 import ctypes
 import hashlib

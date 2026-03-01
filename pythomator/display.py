@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+rich-based terminal output: banners, listings, status messages.
+"""
+
 import shutil
 from datetime import datetime
 from typing import List

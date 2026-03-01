@@ -1,3 +1,8 @@
+"""
+pythomator — GPL-3.0
+click CLI: open, create, ls, put, get subcommands.
+"""
+
 import getpass
 import io
 import os
