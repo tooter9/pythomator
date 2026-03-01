@@ -20,26 +20,18 @@ The cryptography is exactly the same as in Format 8 (1:1). What you create with 
 
 ## Installation
 
-**Recommended:**
-
-```bash
-pip install pipx
-pipx install git+https://github.com/tooter9/pythomator.git
-```
-
-**Alternative:**
-
 ```bash
 git clone https://github.com/tooter9/pythomator.git
 cd pythomator
-pip install .
+pip3 install -r requirements.txt
 ```
+
 ## Quick Start
 
 ### Interactive menu
 
 ```bash
-pythomator
+python3 pythomator.py
 ```
 
 You'll get an interactive menu where you can create a vault, open it, and manage it.
@@ -47,7 +39,7 @@ You'll get an interactive menu where you can create a vault, open it, and manage
 ### Or create a vault directly
 
 ```bash
-pythomator create ./MyVault
+python3 pythomator.py create ./MyVault
 ```
 
 **Important:** If you forget the password, there is absolutely nothing anyone can do to recover it (just like Cryptomator). Write it down, get a tattoo.
